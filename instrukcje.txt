@@ -1,0 +1,4 @@
+Instrukcje, jak odpaliæ program
+Nale¿y dodaæ jara jade.jar z lokalizacji na dysku. W Intellij: Project Structure -> Libraries
+Uruchomienie: Run -> Edit Configurations. Tam jako Main Class wyszukujesz klasy jade.Boot z jara jade'a.
+Przyk³adowe Program Arguments: -gui fajnyAgent:pl.edu.agh.agents.SupervizorAgent
