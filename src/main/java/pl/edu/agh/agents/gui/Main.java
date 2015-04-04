@@ -6,6 +6,7 @@ import jade.wrapper.*;
 import javafx.animation.PathTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
@@ -15,17 +16,21 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Main extends Application {
-
     private static final Color LANE_COLOR = Color.GRAY;
     private List<TrafficLane> lanes = new ArrayList<TrafficLane>();
+    private Map<AID, Rectangle> carShapes = new HashMap<>();
+    private AgentController supervisor;
+    private ContainerController agentContainer;
+    private Group cars;
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        initializeJadePlatform();
-
         Group root = new Group();
         Scene scene = new Scene(root, 800, 600, Color.BLACK);
         primaryStage.setScene(scene);
@@ -33,28 +38,13 @@ public class Main extends Application {
 
         Group lanes = new Group();
         drawLanes(lanes);
-        Path path = new Path();
-        Rectangle car = new Rectangle (0, 280, 40, 40);
-        car.setArcHeight(10);
-        car.setArcWidth(10);
-        car.setFill(Color.ORANGE);
-        path.getElements().add(new MoveTo(20, 300));
-        path.getElements().add(new LineTo(780, 300));
-        PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(4000));
-        pathTransition.setPath(path);
-        pathTransition.setNode(car);
-        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setCycleCount(Timeline.INDEFINITE);
-        pathTransition.setAutoReverse(true);
 
         root.getChildren().add(lanes);
-        Group cars = new Group();
-        cars.getChildren().add(car);
+        cars = new Group();
         root.getChildren().add(cars);
         primaryStage.show();
-        Thread.sleep(1000);
-        pathTransition.play();
+
+        initializeJadePlatform();
     }
 
     private void initializeJadePlatform() throws StaleProxyException {
@@ -62,8 +52,9 @@ public class Main extends Application {
         Profile profile = new ProfileImpl("127.0.0.1", 1199, Profile.PLATFORM_ID);
         profile.setParameter(Profile.PLATFORM_ID, "Platform Name");
         profile.setParameter(Profile.CONTAINER_NAME, "Container Name");
-        ContainerController agentContainer = rt.createMainContainer(profile);
-        AgentController supervisor = agentContainer.createNewAgent("supervisor", "pl.edu.agh.agents.SupervizorAgent", null);
+        agentContainer = rt.createMainContainer(profile);
+        supervisor = agentContainer.createNewAgent("supervisor", "pl.edu.agh.agents.SupervizorAgent",
+                new Object[] {this});
 
         supervisor.start();
     }
@@ -83,6 +74,36 @@ public class Main extends Application {
         r.setY(lane.getBottomRight().getY());
 
         parent.getChildren().add(r);
+    }
+
+    public void moveCar(AID aid, Point point) {
+        Rectangle car = carShapes.get(aid);
+        Path path = new Path();
+        path.getElements().add(new MoveTo(car.getX() + car.getWidth()/2, car.getY() + car.getHeight()/2));
+        path.getElements().add(new LineTo(point.getX(), point.getY()));
+        final PathTransition pathTransition = new PathTransition();
+        pathTransition.setDuration(Duration.millis(500));
+        pathTransition.setPath(path);
+        pathTransition.setNode(car);
+        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
+        pathTransition.setCycleCount(1);
+        pathTransition.play();
+    }
+
+    public void addCar(AID aid, Car car) {
+        final Rectangle carShape = new Rectangle(car.getUpperLeft().getX(), car.getUpperLeft().getY(), car.getWidth(),
+                car.getHeight());
+        carShape.setArcHeight(10);
+        carShape.setArcWidth(10);
+        carShape.setFill(car.getColor());
+        carShapes.put(aid, carShape);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                cars.getChildren().add(carShape);
+            }
+        });
+
     }
 
     public static void main(String[] args) {
