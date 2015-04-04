@@ -1,4 +1,4 @@
-package pl.edu.agh.agents;
+package pl.edu.agh.agents.gui;
 
 import jade.core.*;
 import jade.core.Runtime;
@@ -14,7 +14,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,9 @@ public class Main extends Application {
     private List<TrafficLane> lanes = new ArrayList<TrafficLane>();
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
+        initializeJadePlatform();
+
         Group root = new Group();
         Scene scene = new Scene(root, 800, 600, Color.BLACK);
         primaryStage.setScene(scene);
@@ -54,6 +55,17 @@ public class Main extends Application {
         primaryStage.show();
         Thread.sleep(1000);
         pathTransition.play();
+    }
+
+    private void initializeJadePlatform() throws StaleProxyException {
+        Runtime rt = Runtime.instance();
+        Profile profile = new ProfileImpl("127.0.0.1", 1199, Profile.PLATFORM_ID);
+        profile.setParameter(Profile.PLATFORM_ID, "Platform Name");
+        profile.setParameter(Profile.CONTAINER_NAME, "Container Name");
+        ContainerController agentContainer = rt.createMainContainer(profile);
+        AgentController supervisor = agentContainer.createNewAgent("supervisor", "pl.edu.agh.agents.SupervizorAgent", null);
+
+        supervisor.start();
     }
 
     private void drawLanes(Group parent) {

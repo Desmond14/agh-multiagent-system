@@ -1,4 +1,5 @@
-Instrukcje, jak odpali� program
-Nale�y doda� jara jade.jar z lokalizacji na dysku. W Intellij: Project Structure -> Libraries
-Uruchomienie: Run -> Edit Configurations. Tam jako Main Class wyszukujesz klasy jade.Boot z jara jade'a.
-Przyk�adowe Program Arguments: -gui fajnyAgent:pl.edu.agh.agents.SupervizorAgent
+Instrukcje, jak odpalić program
+Przed uruchomieniem programu należy zbudować projekt z użyciem mavena w celu pobrania zewnętrznych bibliotek.
+W tym celu z konsoli, w katalogu w którym znajduje się plik pom.xml, należy wydać polecenie:
+mvn compile
+Następnie uruchamiamy klasę Main (standardowa metoda main())

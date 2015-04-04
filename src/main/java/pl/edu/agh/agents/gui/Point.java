@@ -1,4 +1,4 @@
-package pl.edu.agh.agents;
+package pl.edu.agh.agents.gui;
 
 public class Point {
     private final int x;
