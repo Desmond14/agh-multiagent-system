@@ -23,7 +23,7 @@ import java.util.Map;
 public class Main extends Application {
     private static final Color LANE_COLOR = Color.GRAY;
     private List<TrafficLane> lanes = new ArrayList<TrafficLane>();
-    private Map<AID, Rectangle> carShapes = new HashMap<>();
+    private Map<AID, Rectangle> carShapes = new HashMap<AID, Rectangle>();
     private AgentController supervisor;
     private ContainerController agentContainer;
     private Group cars;
@@ -88,6 +88,8 @@ public class Main extends Application {
         pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
         pathTransition.setCycleCount(1);
         pathTransition.play();
+
+        //updateCarPosition(car, car.getX() + (double)point.getX(), car.getY());
     }
 
     public void addCar(AID aid, Car car) {
@@ -98,12 +100,16 @@ public class Main extends Application {
         carShape.setFill(car.getColor());
         carShapes.put(aid, carShape);
         Platform.runLater(new Runnable() {
-            @Override
             public void run() {
                 cars.getChildren().add(carShape);
             }
         });
 
+    }
+
+    public void updateCarPosition(Rectangle car, double x, double y) {
+        car.setX(x);
+        car.setY(y);
     }
 
     public static void main(String[] args) {
