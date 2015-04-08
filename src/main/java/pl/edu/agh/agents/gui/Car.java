@@ -3,15 +3,16 @@ package pl.edu.agh.agents.gui;
 import javafx.scene.paint.Color;
 
 public class Car {
-    private Color color = Color.ORANGE;
+    private Color color;
     private Point upperLeft;
     private int height;
     private int width;
 
-    public Car(Point upperLeft, int height, int width) {
+    public Car(Point upperLeft, int height, int width, Color color) {
         this.upperLeft = upperLeft;
         this.height = height;
         this.width = width;
+        this.color = color;
     }
 
     public Point getUpperLeft() {

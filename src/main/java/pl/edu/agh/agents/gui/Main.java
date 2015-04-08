@@ -108,8 +108,8 @@ public class Main extends Application {
     }
 
     public void updateCarPosition(Rectangle car, double x, double y) {
-        car.setX(x);
-        car.setY(y);
+        //car.setX(x);
+        //car.setY(y);
     }
 
     public static void main(String[] args) {

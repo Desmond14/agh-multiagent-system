@@ -2,9 +2,13 @@ package pl.edu.agh.agents;
 
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.SimpleBehaviour;
+import jade.lang.acl.ACLMessage;
+import jade.proto.SimpleAchieveREInitiator;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.AgentController;
 import jade.wrapper.StaleProxyException;
+import javafx.scene.paint.Color;
 import pl.edu.agh.agents.behaviours.MoveCarBehaviour;
 import pl.edu.agh.agents.behaviours.WelcomeBehaviour;
 import pl.edu.agh.agents.gui.Car;
@@ -38,11 +42,19 @@ public class SupervizorAgent extends Agent {
         try {
             String name = "Driver_Dave";
             AID agentID = new AID(name, AID.ISLOCALNAME);
-            //driverAgents.put(agentID, agentContainer.createNewAgent(name, "pl.edu.agh.agents.DriverAgent", null));
-            Car car = new Car(new Point(0, 280), 40, 40);
-            Object[] args = new Object[1];
+            Car car = new Car(new Point(0, 280), 40, 40, Color.ORANGE);
+            int velocity_x = 100;
+            int velocity_y = 300;
+            int max_velocity_x = 1000;
+            int max_velocity_y = 300;
+            Object[] args = new Object[5];
             args[0] = gui;
-            drivers.add(new Driver(agentID, agentContainer.createNewAgent(name, "pl.edu.agh.agents.DriverAgent", args), car, new Point(100, 300)));
+            args[1] = velocity_x;
+            args[2] = velocity_y;
+            args[3] = max_velocity_x;
+            args[4] = max_velocity_y;
+            drivers.add(new Driver(agentID, agentContainer.createNewAgent(name, "pl.edu.agh.agents.DriverAgent", args),
+                    car, new Point(100, 300)));
 //            Thread.sleep(1000);
 //            gui.addCar(agentID, car);
 //            Thread.sleep(1000);
@@ -63,5 +75,18 @@ public class SupervizorAgent extends Agent {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        addBehaviour(new SimpleBehaviour() {
+            @Override
+            public void action() {
+                //otrzymywanie wiadomosci od agentow o ich predkosci, polozeniu itp.
+                ACLMessage msg = receive();
+            }
+
+            @Override
+            public boolean done() {
+                return false;
+            }
+        });
     }
 }
