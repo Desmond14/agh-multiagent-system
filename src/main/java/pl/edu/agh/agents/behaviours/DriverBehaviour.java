@@ -3,11 +3,16 @@ package pl.edu.agh.agents.behaviours;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
+import pl.edu.agh.agents.CarMessage;
+import pl.edu.agh.agents.MessageParser;
+import pl.edu.agh.agents.gui.Car;
 import pl.edu.agh.agents.gui.Main;
 import pl.edu.agh.agents.gui.Point;
 
+import java.util.List;
+
 /**
- * Created by S�awek on 2015-04-07.
+ * Created by S�awek on 2015-04-07.
  */
 public class DriverBehaviour extends Behaviour {
 
@@ -16,6 +21,11 @@ public class DriverBehaviour extends Behaviour {
     private int velocity_y;
     private int max_velocity_x;
     private int max_velocity_y;
+    private Car car;
+    private Point currPosition;
+    private int streetNumber;
+    private boolean done;
+    private int state = 0;
 
     public DriverBehaviour(Agent agent, Object[] args) {
         super(agent);
@@ -24,14 +34,40 @@ public class DriverBehaviour extends Behaviour {
         this.velocity_y = (Integer) args[2];
         this.max_velocity_x = (Integer) args[3];
         this.max_velocity_y = (Integer) args[4];
+        this.car = (Car) args[5];
+        this.streetNumber = (Integer) args[6];
     }
 
     @Override
     public void action() {
-        //tymczasowo samochod wykonuje ruch tylko gdy dostanie wiadomosc od Supervizora - domyslnie z danymi o innych aktorach
         ACLMessage msg = myAgent.receive();
-        if(msg != null) {
 
+        if(msg != null) {
+            switch (state) {
+                case 0:
+                    //jesli to dopiero wiadomosc inicjalizująca agenta
+
+                    state += 1;
+                    break;
+
+                case 1:
+                    List<CarMessage> driversInfo = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
+                    for(CarMessage carInfo : driversInfo) {
+                        if(carInfo.getStreetNumber() == streetNumber) {
+                            //jeśli dwaj kierowcy znajdują się na jednej ulicy, to nie mogą w siebie wjeżdżać
+                            Point carPosition = carInfo.getCarPosition();
+                            int carVelocity_x = carInfo.getVelocity_x();
+                            int carVelocity_y = carInfo.getVelocity_y();
+                        }
+                    }
+            }
+        }
+
+
+        //zachowanie domyślne - przyspiesza +100 w wymiarze, w którym się znajduje (velocity_x, velocity_y)
+        // aż do osiągnięcia maksymalnej predkosci
+        if(msg != null) {
+            String direction;
             if(velocity_x < max_velocity_x) {
                 velocity_x += 100;
             }
@@ -39,11 +75,16 @@ public class DriverBehaviour extends Behaviour {
                 velocity_y += 100;
             }
 
-            myAgent.addBehaviour(new MoveCarBehaviour(myAgent, gui, new Point(velocity_x, velocity_y)));
+            currPosition = new Point(car.getUpperLeft().getX(), car.getUpperLeft().getY() + car.getHeight()/2);
+            Point posiitonAfterMove = new Point(currPosition.getX() + velocity_x, currPosition.getY() + velocity_y);
+
+            myAgent.addBehaviour(new MoveCarBehaviour(myAgent, gui, posiitonAfterMove));
 
             ACLMessage reply = msg.createReply();
             reply.setPerformative(ACLMessage.INFORM);
-            reply.setContent(myAgent.getLocalName() + ";velocity_x" + velocity_x + "velocity_y" + velocity_y);
+            reply.setContent(new CarMessage(myAgent.getLocalName(), posiitonAfterMove, streetNumber, velocity_x, velocity_y).toString());
+            myAgent.send(reply);
+            done = true;
         }
         block();
     }

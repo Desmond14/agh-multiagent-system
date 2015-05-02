@@ -33,7 +33,7 @@ public class WelcomeBehaviour extends Behaviour {
 //        msg.setContent("Welcome agent " + driverAgentID);
 //        msg.addReceiver(driverAgentID);
 //        myAgent.send(msg);
-        gui.addCar(driverAgentID, car);
+        //gui.addCar(driverAgentID, car);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -54,7 +54,7 @@ public class WelcomeBehaviour extends Behaviour {
 
             @Override
             public boolean done() {
-                return false;
+                return addedCar;
             }
         });
     }

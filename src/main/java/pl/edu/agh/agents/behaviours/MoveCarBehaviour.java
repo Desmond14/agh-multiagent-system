@@ -27,7 +27,7 @@ public class MoveCarBehaviour extends Behaviour {
 
     @Override
     public void action() {
-        gui.moveCar(myAgent.getAID(), moveToPoint);
+        //gui.moveCar(myAgent.getAID(), moveToPoint);
         doneThat = true;
         myAgent.addBehaviour(new SimpleBehaviour() {
             @Override
