@@ -9,7 +9,6 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
-import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -31,6 +30,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Main extends Application {
     private static final Color LANE_COLOR = Color.BEIGE;
     private static final int MILLIS_PER_MOVE = 20;
+    public static final int STAGE_WIDTH = 800;
+    public static final int STAGE_HEIGHT = 600;
     private List<TrafficLane> trafficLanes = new ArrayList<TrafficLane>();
     private Map<AID, Rectangle> carShapes = new ConcurrentHashMap<AID, Rectangle>();
     private AgentController supervisor;
@@ -75,10 +76,10 @@ public class Main extends Application {
     }
 
     private void draw(Group parent, TrafficLane lane) {
-        int width = lane.getBottomRight().getX() - lane.getUpperLeft().getX();
-        int height = lane.getBottomRight().getY() - lane.getUpperLeft().getY();
-        int x = lane.getUpperLeft().getX();
-        int y = lane.getUpperLeft().getY();
+        double width = lane.getBottomRight().getX() - lane.getUpperLeft().getX();
+        double height = lane.getBottomRight().getY() - lane.getUpperLeft().getY();
+        double x = lane.getUpperLeft().getX();
+        double y = lane.getUpperLeft().getY();
         Rectangle r = new Rectangle(x, y, width, height);
         r.setFill(LANE_COLOR);
 
@@ -101,13 +102,12 @@ public class Main extends Application {
             @Override
             public void run() {
                 timeline.play();
-                System.out.println("Driver " + aid.getName() + " moved");
             }
         });
     }
 
     private boolean pointOutsideStage(Point point) {
-        return point.getX() > 800 || point.getY() > 600;
+        return point.getX() > STAGE_WIDTH || point.getY() > STAGE_HEIGHT;
     }
 
     public void addCar(AID aid, Car car) {

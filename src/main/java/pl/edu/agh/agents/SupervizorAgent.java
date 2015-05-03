@@ -51,6 +51,7 @@ public class SupervizorAgent extends Agent {
         gui = (Main) arguments[0];
 
         try {
+            //TODO: drivers configuration should be loaded from external resource, e.g. xml
             String name = "Dave";
             AID agentID = new AID(name, AID.ISLOCALNAME);
             Car car = new Car(new Point(0, 280), 40, 40, Color.ORANGE);

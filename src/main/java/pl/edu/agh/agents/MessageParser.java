@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by S³awek on 2015-05-02.
+ * Created by Sï¿½awek on 2015-05-02.
  */
 public class MessageParser {
 
@@ -18,10 +18,10 @@ public class MessageParser {
             if(!info[0].equals(agentName)) {
                 carMessages.add(new CarMessage(
                         info[0],
-                        new Point(Integer.parseInt(info[1]), Integer.parseInt(info[2])),
-                        Integer.parseInt(info[2]),
+                        new Point(Double.parseDouble(info[1]), Double.parseDouble(info[2])),
                         Integer.parseInt(info[3]),
-                        Integer.parseInt(info[4])
+                        Integer.parseInt(info[4]),
+                        Integer.parseInt(info[5])
                 ));
             }
         }

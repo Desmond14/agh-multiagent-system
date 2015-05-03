@@ -3,7 +3,7 @@ package pl.edu.agh.agents;
 import pl.edu.agh.agents.gui.Point;
 
 /**
- * Created by S³awek on 2015-04-25.
+ * Created by Sï¿½awek on 2015-04-25.
  */
 public class CarMessage {
 
