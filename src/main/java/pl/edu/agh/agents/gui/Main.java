@@ -9,6 +9,7 @@ import jade.wrapper.ContainerController;
 import jade.wrapper.StaleProxyException;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
+import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -28,7 +29,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Main extends Application {
-    private static final Color LANE_COLOR = Color.GRAY;
+    private static final Color LANE_COLOR = Color.BEIGE;
     private static final int MILLIS_PER_MOVE = 20;
     private List<TrafficLane> trafficLanes = new ArrayList<TrafficLane>();
     private Map<AID, Rectangle> carShapes = new ConcurrentHashMap<AID, Rectangle>();
@@ -47,7 +48,7 @@ public class Main extends Application {
         trafficLanes.add(new TrafficLane(new Point(0, 275), new Point(800, 325)));
         trafficLanes.add(new TrafficLane(new Point(375, 0), new Point(425, 600)));
         lanes = new Group();
-        drawLanes(root);
+        drawLanes(lanes);
 
         root.getChildren().add(lanes);
         primaryStage.show();
@@ -75,22 +76,23 @@ public class Main extends Application {
 
     private void draw(Group parent, TrafficLane lane) {
         int width = lane.getBottomRight().getX() - lane.getUpperLeft().getX();
-        int height = lane.getUpperLeft().getY() - lane.getBottomRight().getY();
-
-        Rectangle r = new Rectangle(width, height, LANE_COLOR);
-        r.setX(lane.getUpperLeft().getX());
-        r.setY(lane.getBottomRight().getY());
+        int height = lane.getBottomRight().getY() - lane.getUpperLeft().getY();
+        int x = lane.getUpperLeft().getX();
+        int y = lane.getUpperLeft().getY();
+        Rectangle r = new Rectangle(x, y, width, height);
+        r.setFill(LANE_COLOR);
 
         parent.getChildren().add(r);
     }
 
     public void moveCar(final AID aid, final Point point) {
-
+        if (pointOutsideStage(point)){
+            return;
+        }
         final Timeline timeline = new Timeline();
         timeline.setAutoReverse(false);
         timeline.setCycleCount(1);
         timeline.setDelay(new Duration(MILLIS_PER_MOVE));
-
         KeyValue keyValueX = new KeyValue(carShapes.get(aid).xProperty(), point.getX());
         KeyValue keyValueY = new KeyValue(carShapes.get(aid).yProperty(), point.getY());
 
@@ -102,6 +104,10 @@ public class Main extends Application {
                 System.out.println("Driver " + aid.getName() + " moved");
             }
         });
+    }
+
+    private boolean pointOutsideStage(Point point) {
+        return point.getX() > 800 || point.getY() > 600;
     }
 
     public void addCar(AID aid, Car car) {
