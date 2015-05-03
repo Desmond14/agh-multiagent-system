@@ -1,49 +1,57 @@
 package pl.edu.agh.agents.gui;
 
-import jade.core.*;
+import jade.core.AID;
+import jade.core.Profile;
+import jade.core.ProfileImpl;
 import jade.core.Runtime;
-import jade.wrapper.*;
-import javafx.animation.PathTransition;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
+import jade.wrapper.StaleProxyException;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.*;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Main extends Application {
     private static final Color LANE_COLOR = Color.GRAY;
-    private List<TrafficLane> lanes = new ArrayList<TrafficLane>();
-    private Map<AID, Rectangle> carShapes = new HashMap<AID, Rectangle>();
+    private static final int MILLIS_PER_MOVE = 20;
+    private List<TrafficLane> trafficLanes = new ArrayList<TrafficLane>();
+    private Map<AID, Rectangle> carShapes = new ConcurrentHashMap<AID, Rectangle>();
     private AgentController supervisor;
     private ContainerController agentContainer;
-    private Group cars;
+    private Group root;
+    private Group lanes;
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Group root = new Group();
+        root = new Group();
         Scene scene = new Scene(root, 800, 600, Color.BLACK);
         primaryStage.setScene(scene);
-        lanes.add(new TrafficLane(new Point(0,275), new Point(800, 325)));
-
-        Group lanes = new Group();
-        drawLanes(lanes);
+        //TODO: trafficLanes should be loaded from external source, e.g. xml
+        trafficLanes.add(new TrafficLane(new Point(0, 275), new Point(800, 325)));
+        trafficLanes.add(new TrafficLane(new Point(375, 0), new Point(425, 600)));
+        lanes = new Group();
+        drawLanes(root);
 
         root.getChildren().add(lanes);
-        cars = new Group();
-        root.getChildren().add(cars);
         primaryStage.show();
-
+//        displayText("Collision detected!");
         initializeJadePlatform();
     }
 
@@ -54,13 +62,13 @@ public class Main extends Application {
         profile.setParameter(Profile.CONTAINER_NAME, "Container Name");
         agentContainer = rt.createMainContainer(profile);
         supervisor = agentContainer.createNewAgent("supervisor", "pl.edu.agh.agents.SupervizorAgent",
-                new Object[] {this});
+                new Object[]{this});
 
         supervisor.start();
     }
 
     private void drawLanes(Group parent) {
-        for (TrafficLane lane : lanes) {
+        for (TrafficLane lane : trafficLanes) {
             draw(parent, lane);
         }
     }
@@ -76,20 +84,24 @@ public class Main extends Application {
         parent.getChildren().add(r);
     }
 
-    public void moveCar(AID aid, Point point) {
-        Rectangle car = carShapes.get(aid);
-        Path path = new Path();
-        path.getElements().add(new MoveTo(car.getX() + car.getWidth()/2, car.getY() + car.getHeight()/2));
-        path.getElements().add(new LineTo(point.getX(), point.getY()));
-        final PathTransition pathTransition = new PathTransition();
-        pathTransition.setDuration(Duration.millis(500));
-        pathTransition.setPath(path);
-        pathTransition.setNode(car);
-        pathTransition.setOrientation(PathTransition.OrientationType.ORTHOGONAL_TO_TANGENT);
-        pathTransition.setCycleCount(1);
-        pathTransition.play();
+    public void moveCar(final AID aid, final Point point) {
 
-        //updateCarPosition(car, car.getX() + (double)point.getX(), car.getY());
+        final Timeline timeline = new Timeline();
+        timeline.setAutoReverse(false);
+        timeline.setCycleCount(1);
+        timeline.setDelay(new Duration(MILLIS_PER_MOVE));
+
+        KeyValue keyValueX = new KeyValue(carShapes.get(aid).xProperty(), point.getX());
+        KeyValue keyValueY = new KeyValue(carShapes.get(aid).yProperty(), point.getY());
+
+        timeline.getKeyFrames().add(new KeyFrame(new Duration(MILLIS_PER_MOVE), keyValueX, keyValueY));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                timeline.play();
+                System.out.println("Driver " + aid.getName() + " moved");
+            }
+        });
     }
 
     public void addCar(AID aid, Car car) {
@@ -101,15 +113,23 @@ public class Main extends Application {
         carShapes.put(aid, carShape);
         Platform.runLater(new Runnable() {
             public void run() {
-                cars.getChildren().add(carShape);
+                lanes.getChildren().add(carShape);
+            }
+        });
+    }
+
+    public void displayText(String text){
+        final Text textShape = new Text(50.0, 100.0, text);
+        textShape.setFill(Color.RED);
+        textShape.setFont(Font.font("Verdana", 30));
+        textShape.setTextAlignment(TextAlignment.CENTER);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                root.getChildren().add(textShape);
             }
         });
 
-    }
-
-    public void updateCarPosition(Rectangle car, double x, double y) {
-        //car.setX(x);
-        //car.setY(y);
     }
 
     public static void main(String[] args) {

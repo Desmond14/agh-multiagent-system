@@ -10,7 +10,7 @@ import pl.edu.agh.agents.gui.Main;
 import pl.edu.agh.agents.gui.Point;
 
 /**
- * Created by S³awek on 2015-03-27.
+ * Created by Sï¿½awek on 2015-03-27.
  */
 public class WelcomeBehaviour extends Behaviour {
 
@@ -33,7 +33,7 @@ public class WelcomeBehaviour extends Behaviour {
 //        msg.setContent("Welcome agent " + driverAgentID);
 //        msg.addReceiver(driverAgentID);
 //        myAgent.send(msg);
-        //gui.addCar(driverAgentID, car);
+        gui.addCar(driverAgentID, car);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

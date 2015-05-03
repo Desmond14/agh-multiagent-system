@@ -35,6 +35,7 @@ public class DriverBehaviour extends Behaviour {
         this.max_velocity_x = (Integer) args[3];
         this.max_velocity_y = (Integer) args[4];
         this.car = (Car) args[5];
+        this.currPosition = car.getUpperLeft();
         this.streetNumber = (Integer) args[6];
     }
 
@@ -69,21 +70,21 @@ public class DriverBehaviour extends Behaviour {
         if(msg != null) {
             String direction;
             if(velocity_x < max_velocity_x) {
-                velocity_x += 100;
+                velocity_x += 1;
             }
             if(velocity_y < max_velocity_y) {
-                velocity_y += 100;
+                velocity_y += 1;
             }
 
-            currPosition = new Point(car.getUpperLeft().getX(), car.getUpperLeft().getY() + car.getHeight()/2);
-            Point posiitonAfterMove = new Point(currPosition.getX() + velocity_x, currPosition.getY() + velocity_y);
-
-            myAgent.addBehaviour(new MoveCarBehaviour(myAgent, gui, posiitonAfterMove));
+            Point positionAfterMove = new Point(currPosition.getX() + velocity_x, currPosition.getY() + velocity_y);
+            System.out.println("Moving agent " + myAgent.getLocalName() + " from " + currPosition + " to " + positionAfterMove);
+            myAgent.addBehaviour(new MoveCarBehaviour(myAgent, gui, positionAfterMove));
 
             ACLMessage reply = msg.createReply();
             reply.setPerformative(ACLMessage.INFORM);
-            reply.setContent(new CarMessage(myAgent.getLocalName(), posiitonAfterMove, streetNumber, velocity_x, velocity_y).toString());
+            reply.setContent(new CarMessage(myAgent.getLocalName(), positionAfterMove, streetNumber, velocity_x, velocity_y).toString());
             myAgent.send(reply);
+            currPosition = positionAfterMove;
             done = true;
         }
         block();
