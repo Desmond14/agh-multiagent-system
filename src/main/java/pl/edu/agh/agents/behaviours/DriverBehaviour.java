@@ -10,7 +10,6 @@ import pl.edu.agh.agents.gui.Car;
 import pl.edu.agh.agents.gui.Main;
 import pl.edu.agh.agents.gui.Point;
 
-import javax.sql.PooledConnection;
 import java.util.List;
 
 /**
@@ -54,42 +53,57 @@ public class DriverBehaviour extends Behaviour {
             if (!msg.getContent().startsWith("Welcome")) {
                 chanceForCollisionSameStreet = false;
                 List<CarMessage> driversInfo = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
+                Point myPredictedUpperRightPosition = null;
                 for (CarMessage otherCarInfo : driversInfo) {
                     if (!otherCarInfo.getDriverName().equals(myAgent.getLocalName()) && otherCarInfo.getStreetNumber() == streetNumber
-                            && chechIfCarIsBehind(currPosition, otherCarInfo.getCarPosition())) {
+                            && checkIfCarIsBehind(currPosition, otherCarInfo.getCarPosition())) {
                         //jeśli dwaj kierowcy znajdują się na jednej ulicy, to nie mogą w siebie wjeżdżać
 
-                        Point myPredictedUpperRightPosition = null;
-                        if (velocity_x < max_velocity_x && direction.equals(Direction.X_RIGHT)) {
-                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + acceleration + car.getWidth(),
-                                    currPosition.getY() + velocity_y);
+                        if(myPredictedUpperRightPosition == null) {
+                            if (velocity_x < max_velocity_x && direction.equals(Direction.X_RIGHT)) {
+                                myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + acceleration + car.getWidth(),
+                                        currPosition.getY() + velocity_y);
+                            }
+                            else if (velocity_y < max_velocity_y && direction.equals(Direction.Y_DOWN)) {
+                                myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
+                                        currPosition.getY() + velocity_y + acceleration + car.getWidth());
+                            } else if (velocity_x == max_velocity_x && direction.equals(Direction.X_RIGHT)) {
+                                myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + car.getWidth(),
+                                        currPosition.getY() + velocity_y);
+                            }
+                            else if (velocity_y == max_velocity_y && direction.equals(Direction.Y_DOWN)) {
+                                myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
+                                        currPosition.getY() + velocity_y + car.getWidth());
+                            }
                         }
-                        //możliwe, że będzie trzeba odejmować car.getWidth()
-                        else if (velocity_y < max_velocity_y && direction.equals(Direction.Y_DOWN)) {
-                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
-                                    currPosition.getY() + velocity_y + acceleration + car.getWidth());
-                        } else if (velocity_x >= max_velocity_x && direction.equals(Direction.X_RIGHT)) {
-                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + car.getWidth(),
-                                    currPosition.getY() + velocity_y);
-                        }
-                        //możliwe, że będzie trzeba odejmować car.getWidth()
-                        else if (velocity_y == max_velocity_y && direction.equals(Direction.Y_DOWN)) {
-                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
-                                    currPosition.getY() + velocity_y + car.getWidth());
-                        }
+                        //Point myPredictedUpperRightPosition = null;
+
 
                         positionAfterMove = avoidCollision(myPredictedUpperRightPosition, otherCarInfo);
+                    }
+                    else if(!otherCarInfo.getDriverName().equals(myAgent.getLocalName()) && otherCarInfo.getStreetNumber() != streetNumber
+                            && checkIfCarIsBehind(currPosition, otherCarInfo.getCarPosition())) {
+
+//                        if (velocity_x < max_velocity_x && direction.equals(Direction.X_RIGHT)) {
+//                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + acceleration + car.getWidth(),
+//                                    currPosition.getY() + velocity_y);
+//                        }
+//                        else if (velocity_y < max_velocity_y && direction.equals(Direction.Y_DOWN)) {
+//                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
+//                                    currPosition.getY() + velocity_y + acceleration + car.getWidth());
+//                        } else if (velocity_x >= max_velocity_x && direction.equals(Direction.X_RIGHT)) {
+//                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x + car.getWidth(),
+//                                    currPosition.getY() + velocity_y);
+//                        }
+//                        else if (velocity_y == max_velocity_y && direction.equals(Direction.Y_DOWN)) {
+//                            myPredictedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
+//                                    currPosition.getY() + velocity_y + car.getWidth());
+//                        }
                     }
                 }
             }
 
 
-
-//            if (chanceForCollisionSameStreet) {
-//                performMove(positionAfterMove, msg);
-//            } else {
-//                normalDrive(msg);
-//            }
             if(positionAfterMove == null) {
                 if (velocity_x < max_velocity_x) {
                     if(max_velocity_x - velocity_x >= acceleration) {
@@ -111,11 +125,7 @@ public class DriverBehaviour extends Behaviour {
                 positionAfterMove = new Point(currPosition.getX() + velocity_x, currPosition.getY() + velocity_y);
             }
             performMove(positionAfterMove, msg);
-
         }
-
-
-
     }
 
     @Override
@@ -123,29 +133,36 @@ public class DriverBehaviour extends Behaviour {
         return false;
     }
 
-    //dobrze, by nie zwracało samego pointa, ale też np. szybkość, jaką uzyskaliśmy (chyba, że da się to wyliczyć)
     public Point avoidCollision(Point myUpperRight, CarMessage otherCarInfo) {
         int tested_velocity = 0;
         if(direction.equals(Direction.X_RIGHT)) {
-            tested_velocity = velocity_x + acceleration;
+            if(max_velocity_x - velocity_x >= acceleration) {
+                tested_velocity = velocity_x + acceleration;
+            }
+            else {
+                tested_velocity = max_velocity_x;
+            }
+
         }
         else if(direction.equals(Direction.Y_DOWN)) {
-            tested_velocity = velocity_y + acceleration;
+            if(max_velocity_y - velocity_y >= acceleration) {
+                tested_velocity = velocity_y + acceleration;
+            }
+            else {
+                tested_velocity = max_velocity_y;
+            }
         }
         Point myTestedUpperRightPosition = myUpperRight;
         Point myFinalUpperLeftPosition = null;
         while(collisionHappens(myTestedUpperRightPosition, otherCarInfo.getCarPosition()) && tested_velocity >= 0) {
-            //poczatkowo bede zmniejszac predkosc o 1
 
             if(direction.equals(Direction.X_RIGHT)) {
                 myTestedUpperRightPosition = new Point(currPosition.getX() + tested_velocity + car.getWidth(),
                         currPosition.getY() + velocity_y);
-                //myFinalUpperLeftPosition = new Point(currPosition.getX() + tested_velocity, currPosition.getY() + velocity_y);
             }
             else if(direction.equals(Direction.Y_DOWN)) {
                 myTestedUpperRightPosition = new Point(currPosition.getX() + velocity_x,
                         currPosition.getY() + tested_velocity + car.getWidth());
-                //myFinalUpperLeftPosition = new Point(currPosition.getX() + velocity_x, currPosition.getY() + tested_velocity);
             }
             tested_velocity--;
         }
@@ -166,7 +183,6 @@ public class DriverBehaviour extends Behaviour {
             chanceForCollisionSameStreet = true;
             return true;
         }
-        //możliwe, że będzie trzeba zamienić na <= w końcu poruszają sie w dół, jeśli y rosną w górę
         if(direction.equals(Direction.Y_DOWN) && myTestedUpperRight.getY() >= otherCarPosition.getY()) {
             chanceForCollisionSameStreet = true;
             return true;
@@ -186,21 +202,12 @@ public class DriverBehaviour extends Behaviour {
         block();
     }
 
-    private void normalDrive(ACLMessage msg) {
-//        if(velocity_x < max_velocity_x) {
-//            velocity_x += acceleration;
-//        }
-//        if(velocity_y < max_velocity_y) {
-//            velocity_y += acceleration;
-//        }
-
-        Point positionAfterMove = new Point(currPosition.getX() + velocity_x, currPosition.getY() + velocity_y);
-        performMove(positionAfterMove, msg);
-    }
-
-    private boolean chechIfCarIsBehind(Point myUpperLeft, Point otherCarUpperLeft) {
+    private boolean checkIfCarIsBehind(Point myUpperLeft, Point otherCarUpperLeft) {
         if(direction.equals(Direction.X_RIGHT)) {
             return myUpperLeft.getX() < otherCarUpperLeft.getX();
+        }
+        else if(direction.equals(Direction.Y_DOWN)) {
+            return myUpperLeft.getY() < otherCarUpperLeft.getY();
         }
         return false;
     }

@@ -79,8 +79,8 @@ public class SupervizorAgent extends Agent {
             int velocity_x2 = 0;
             int velocity_y2 = 2;
             int max_velocity_x2 = 0;
-            int max_velocity_y2 = 10;
-            int acceleration2 = 2;
+            int max_velocity_y2 = 17;
+            int acceleration2 = 3;
             Object[] args2 = new Object[9];
             args2[0] = gui;
             args2[1] = velocity_x2;
@@ -93,6 +93,7 @@ public class SupervizorAgent extends Agent {
             args2[8] = acceleration2;
             drivers.add(new Driver(agentID2, agentContainer.createNewAgent(name2, "pl.edu.agh.agents.DriverAgent", args2),
                     car2, new Point(100, 300)));
+
 
             String name3 = "John";
             AID agentID3 = new AID(name3, AID.ISLOCALNAME);
@@ -114,6 +115,27 @@ public class SupervizorAgent extends Agent {
             args3[8] = acceleration3;
             drivers.add(new Driver(agentID3, agentContainer.createNewAgent(name3, "pl.edu.agh.agents.DriverAgent", args3),
                     car3, new Point(100, 300)));
+
+            String name4 = "Ann";
+            AID agentID4 = new AID(name4, AID.ISLOCALNAME);
+            Car car4 = new Car(new Point(380, 50), 40, 40, Color.RED);
+            int velocity_x4 = 0;
+            int velocity_y4 = 1;
+            int max_velocity_x4 = 0;
+            int max_velocity_y4 = 10;
+            int acceleration4 = 2;
+            Object[] args4 = new Object[9];
+            args4[0] = gui;
+            args4[1] = velocity_x4;
+            args4[2] = velocity_y4;
+            args4[3] = max_velocity_x4;
+            args4[4] = max_velocity_y4;
+            args4[5] = car4;
+            args4[6] = streets.get(1).getStreetNumber();
+            args4[7] = Direction.Y_DOWN;
+            args4[8] = acceleration4;
+            drivers.add(new Driver(agentID4, agentContainer.createNewAgent(name4, "pl.edu.agh.agents.DriverAgent", args4),
+                    car4, new Point(100, 300)));
 
             for(Driver driver : drivers) {
                 Thread.sleep(1000);
