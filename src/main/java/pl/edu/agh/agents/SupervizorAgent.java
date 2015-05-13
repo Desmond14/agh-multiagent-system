@@ -54,12 +54,13 @@ public class SupervizorAgent extends Agent {
             //TODO: drivers configuration should be loaded from external resource, e.g. xml
             String name = "Dave";
             AID agentID = new AID(name, AID.ISLOCALNAME);
-            Car car = new Car(new Point(0, 280), 40, 40, Color.ORANGE);
+            Car car = new Car(new Point(0, 280), 40, 40, Color.GREEN);
             int velocity_x = 1;
             int velocity_y = 0;
-            int max_velocity_x = 15;
+            int max_velocity_x = 20;
             int max_velocity_y = 0;
-            Object[] args = new Object[7];
+            int acceleration = 3;
+            Object[] args = new Object[9];
             args[0] = gui;
             args[1] = velocity_x;
             args[2] = velocity_y;
@@ -67,6 +68,8 @@ public class SupervizorAgent extends Agent {
             args[4] = max_velocity_y;
             args[5] = car;
             args[6] = streets.get(0).getStreetNumber();
+            args[7] = Direction.X_RIGHT;
+            args[8] = acceleration;
             drivers.add(new Driver(agentID, agentContainer.createNewAgent(name, "pl.edu.agh.agents.DriverAgent", args),
                     car, new Point(100, 300)));
 
@@ -77,7 +80,8 @@ public class SupervizorAgent extends Agent {
             int velocity_y2 = 2;
             int max_velocity_x2 = 0;
             int max_velocity_y2 = 10;
-            Object[] args2 = new Object[7];
+            int acceleration2 = 2;
+            Object[] args2 = new Object[9];
             args2[0] = gui;
             args2[1] = velocity_x2;
             args2[2] = velocity_y2;
@@ -85,8 +89,31 @@ public class SupervizorAgent extends Agent {
             args2[4] = max_velocity_y2;
             args2[5] = car2;
             args2[6] = streets.get(1).getStreetNumber();
+            args2[7] = Direction.Y_DOWN;
+            args2[8] = acceleration2;
             drivers.add(new Driver(agentID2, agentContainer.createNewAgent(name2, "pl.edu.agh.agents.DriverAgent", args2),
                     car2, new Point(100, 300)));
+
+            String name3 = "John";
+            AID agentID3 = new AID(name3, AID.ISLOCALNAME);
+            Car car3 = new Car(new Point(80, 280), 40, 40, Color.BLUE);
+            int velocity_x3 = 1;
+            int velocity_y3 = 0;
+            int max_velocity_x3 = 35;
+            int max_velocity_y3 = 0;
+            int acceleration3 = 1;
+            Object[] args3 = new Object[9];
+            args3[0] = gui;
+            args3[1] = velocity_x3;
+            args3[2] = velocity_y3;
+            args3[3] = max_velocity_x3;
+            args3[4] = max_velocity_y3;
+            args3[5] = car3;
+            args3[6] = streets.get(0).getStreetNumber();
+            args3[7] = Direction.X_RIGHT;
+            args3[8] = acceleration3;
+            drivers.add(new Driver(agentID3, agentContainer.createNewAgent(name3, "pl.edu.agh.agents.DriverAgent", args3),
+                    car3, new Point(100, 300)));
 
             for(Driver driver : drivers) {
                 Thread.sleep(1000);
@@ -96,6 +123,7 @@ public class SupervizorAgent extends Agent {
                     e.printStackTrace();
                 }
                 addBehaviour(new WelcomeBehaviour(this, driver.getDriverAgentID(), driver.getCar(), gui));
+
             }
 
         } catch (StaleProxyException e) {

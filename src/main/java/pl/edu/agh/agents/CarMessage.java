@@ -12,13 +12,15 @@ public class CarMessage {
     private int streetNumber;
     private int velocity_x;
     private int velocity_y;
+    private Direction direction;
 
-    public CarMessage(String driverName, Point carPosition, int streetNumber, int velocity_x, int velocity_y) {
+    public CarMessage(String driverName, Point carPosition, int streetNumber, int velocity_x, int velocity_y, Direction direction) {
         this.driverName = driverName;
         this.carPosition = carPosition;
         this.streetNumber = streetNumber;
         this.velocity_x = velocity_x;
         this.velocity_y = velocity_y;
+        this.direction = direction;
     }
 
     public String getDriverName() {
@@ -41,8 +43,11 @@ public class CarMessage {
         return velocity_y;
     }
 
+    public Direction getDirection() { return direction; }
+
     @Override
     public String toString() {
-        return driverName + ";" + carPosition.getX() + ";" + carPosition.getY() + ";" + streetNumber + ";" + velocity_x + ";" + velocity_y;
+        return driverName + ";" + carPosition.getX() + ";" + carPosition.getY() + ";" +
+                streetNumber + ";" + velocity_x + ";" + velocity_y + ";" + direction.toString();
     }
 }

@@ -21,7 +21,8 @@ public class MessageParser {
                         new Point(Double.parseDouble(info[1]), Double.parseDouble(info[2])),
                         Integer.parseInt(info[3]),
                         Integer.parseInt(info[4]),
-                        Integer.parseInt(info[5])
+                        Integer.parseInt(info[5]),
+                        Direction.valueOf(info[6])
                 ));
             }
         }
