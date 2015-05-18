@@ -105,10 +105,15 @@ public class DriverBehaviour extends Behaviour {
 
     private int calculateTimeToCollision(CarMessage closestCar) {
         double otherCarPosition = closestCar.getCurrentPosition();
-        return (int) Math.round(otherCarPosition / velocity);
+        double distance = otherCarPosition - carWidth - currentPosition;
+        if (velocity != 0) {
+            return (int) Math.round(distance / velocity);
+        }
+        return Integer.MAX_VALUE;
     }
 
     private void slowDown() {
+        System.out.println("Slowing down!");
         double distance;
         int newVelocity = Math.max(velocity - acceleration, 0);
         distance = (velocity + newVelocity) / 2;    // simple approximation of accelarated move
