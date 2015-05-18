@@ -7,5 +7,7 @@ public enum Direction {
     X_RIGHT,
     X_LEFT,
     Y_UP,
-    Y_DOWN
+    Y_DOWN,
+    HORIZONTAL,
+    VERTICAL
 }

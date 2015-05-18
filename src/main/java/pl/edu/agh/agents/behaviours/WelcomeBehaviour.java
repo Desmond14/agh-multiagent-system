@@ -9,9 +9,6 @@ import pl.edu.agh.agents.gui.Car;
 import pl.edu.agh.agents.gui.Main;
 import pl.edu.agh.agents.gui.Point;
 
-/**
- * Created by S�awek on 2015-03-27.
- */
 public class WelcomeBehaviour extends Behaviour {
 
     private AID driverAgentID;
@@ -28,11 +25,6 @@ public class WelcomeBehaviour extends Behaviour {
 
     @Override
     public void action() {
-//        System.out.println("I will send message to: " + driverAgentID);
-//        ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-//        msg.setContent("Welcome agent " + driverAgentID);
-//        msg.addReceiver(driverAgentID);
-//        myAgent.send(msg);
         gui.addCar(driverAgentID, car);
         try {
             Thread.sleep(1000);
@@ -49,7 +41,7 @@ public class WelcomeBehaviour extends Behaviour {
                 msg.setContent("Welcome agent " + driverAgentID);
                 msg.addReceiver(driverAgentID);
                 myAgent.send(msg);
-                block(2000);
+                block(1000);
             }
 
             @Override

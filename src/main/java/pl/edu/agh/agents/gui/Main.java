@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Main extends Application {
     private static final Color LANE_COLOR = Color.BEIGE;
-    private static final int MILLIS_PER_MOVE = 20;
+    private static final int MILLIS_PER_MOVE = 40;
     public static final int STAGE_WIDTH = 800;
     public static final int STAGE_HEIGHT = 600;
     private List<TrafficLane> trafficLanes = new ArrayList<TrafficLane>();
@@ -43,7 +43,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         root = new Group();
-        Scene scene = new Scene(root, 800, 600, Color.BLACK);
+        Scene scene = new Scene(root, STAGE_WIDTH, STAGE_HEIGHT, Color.BLACK);
         primaryStage.setScene(scene);
         //TODO: trafficLanes should be loaded from external source, e.g. xml
         trafficLanes.add(new TrafficLane(new Point(0, 275), new Point(800, 325)));

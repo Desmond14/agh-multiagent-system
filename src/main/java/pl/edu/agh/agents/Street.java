@@ -3,16 +3,15 @@ package pl.edu.agh.agents;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by S³awek on 2015-05-01.
- */
 public class Street {
 
     private int streetNumber;
     private List<Street> neighbourStreets;
+    private Direction direction;
 
-    public Street(int streetNumber) {
+    public Street(int streetNumber, Direction direction) {
         this.streetNumber = streetNumber;
+        this.setDirection(direction);
         neighbourStreets = new ArrayList<Street>();
     }
 
@@ -24,5 +23,13 @@ public class Street {
 
     public void addNeighbourStreet(Street street) {
         neighbourStreets.add(street);
+    }
+
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 }
