@@ -5,10 +5,10 @@ import javafx.scene.paint.Color;
 public class Car {
     private Color color;
     private Point upperLeft;
-    private int height;
-    private int width;
+    private Double height;
+    private Double width;
 
-    public Car(Point upperLeft, int height, int width, Color color) {
+    public Car(Point upperLeft, Double height, Double width, Color color) {
         this.upperLeft = upperLeft;
         this.height = height;
         this.width = width;
@@ -23,19 +23,19 @@ public class Car {
         this.upperLeft = upperLeft;
     }
 
-    public int getHeight() {
+    public Double getHeight() {
         return height;
     }
 
-    public void setHeight(int height) {
+    public void setHeight(Double height) {
         this.height = height;
     }
 
-    public int getWidth() {
+    public Double getWidth() {
         return width;
     }
 
-    public void setWidth(int width) {
+    public void setWidth(Double width) {
         this.width = width;
     }
 

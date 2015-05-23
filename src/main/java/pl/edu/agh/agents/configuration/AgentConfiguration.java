@@ -1,4 +1,4 @@
-package pl.edu.agh.agents;
+package pl.edu.agh.agents.configuration;
 
 public class AgentConfiguration {
     private String name;

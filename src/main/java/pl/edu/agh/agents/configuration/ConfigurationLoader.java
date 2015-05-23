@@ -1,8 +1,9 @@
-package pl.edu.agh.agents;
+package pl.edu.agh.agents.configuration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -14,6 +15,7 @@ public class ConfigurationLoader {
     private Properties properties;
 
     public void load() throws IOException {
+        agentConfigurations = new ArrayList<>();
         properties = loadPropertiesFile(CONFIG_FILENAME);
         loadAgentConfigurations();
     }
@@ -40,7 +42,8 @@ public class ConfigurationLoader {
     }
 
     private Properties loadPropertiesFile(String filename) throws IOException {
-        InputStream configInputStream = new FileInputStream(filename);
+        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+        InputStream configInputStream = classloader.getResourceAsStream(filename);
         Properties properties;
         try {
             properties = new Properties();

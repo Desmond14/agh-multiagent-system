@@ -5,6 +5,7 @@ import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import pl.edu.agh.agents.CarMessage;
 import pl.edu.agh.agents.MessageParser;
+import pl.edu.agh.agents.configuration.AgentConfiguration;
 import pl.edu.agh.agents.gui.Point;
 import java.lang.Math;
 
@@ -13,22 +14,16 @@ import java.util.List;
 
 public class DriverBehaviour extends Behaviour {
     public static int TIME_TO_COLLISION_THRESHOLD = 2;
-    private int velocity;
-    private int maxVelocity;
-    private int acceleration;
-    private double currentPosition;
-    private int streetNumber;
-    private int carWidth;
+    private AgentConfiguration configuration;
+    private Double currentPosition;
+    private Integer velocity;
     private boolean done;
 
     public DriverBehaviour(Agent agent, Object[] args) {
         super(agent);
-        this.carWidth = (Integer) args[0];
-        this.velocity = (Integer) args[1];
-        this.maxVelocity = (Integer) args[3];
-        this.currentPosition = (Double) args[5];
-        this.streetNumber = (Integer) args[6];
-        this.acceleration = (Integer) args[8];
+        configuration = (AgentConfiguration) args[0];
+        currentPosition = configuration.getInitialPosition();
+        velocity = configuration.getInitialVelocity();
     }
 
     @Override
@@ -62,7 +57,7 @@ public class DriverBehaviour extends Behaviour {
     }
 
     private boolean isOnSameStreet(CarMessage message) {
-        return this.streetNumber == message.getStreetNumber();
+        return configuration.getStreetNumber() == message.getStreetNumber();
     }
 
     private boolean isAheadOfMe(CarMessage message) {
@@ -71,7 +66,7 @@ public class DriverBehaviour extends Behaviour {
 
     private void simplyMove() {
         double distance;
-        int newVelocity = Math.min(velocity + acceleration, maxVelocity);
+        int newVelocity = Math.min(velocity + configuration.getAcceleration(), configuration.getMaxVelocity());
         distance = (velocity + newVelocity) / 2;    // simple approximation of accelarated move
         currentPosition += distance;
         velocity = newVelocity;
@@ -91,7 +86,7 @@ public class DriverBehaviour extends Behaviour {
     }
 
     private double calculateDistance(CarMessage message) {
-        return message.getCurrentPosition() - (this.currentPosition + this.carWidth);
+        return message.getCurrentPosition() - (this.currentPosition + configuration.getCarWidth());
     }
 
     private void avoidCollisionWith(CarMessage closestCar) {
@@ -105,7 +100,7 @@ public class DriverBehaviour extends Behaviour {
 
     private int calculateTimeToCollision(CarMessage closestCar) {
         double otherCarPosition = closestCar.getCurrentPosition();
-        double distance = otherCarPosition - carWidth - currentPosition;
+        double distance = otherCarPosition - configuration.getCarWidth() - currentPosition;
         if (velocity != 0) {
             return (int) Math.round(distance / velocity);
         }
@@ -115,7 +110,7 @@ public class DriverBehaviour extends Behaviour {
     private void slowDown() {
         System.out.println("Slowing down!");
         double distance;
-        int newVelocity = Math.max(velocity - acceleration, 0);
+        int newVelocity = Math.max(velocity - configuration.getAcceleration(), 0);
         distance = (velocity + newVelocity) / 2;    // simple approximation of accelarated move
         currentPosition += distance;
         velocity = newVelocity;
@@ -124,7 +119,7 @@ public class DriverBehaviour extends Behaviour {
     private void replyWithNewPosition(ACLMessage msg) {
         ACLMessage reply = msg.createReply();
         reply.setPerformative(ACLMessage.INFORM);
-        reply.setContent(new CarMessage(myAgent.getLocalName(), currentPosition, streetNumber, velocity).toString());
+        reply.setContent(new CarMessage(myAgent.getLocalName(), currentPosition, configuration.getStreetNumber(), velocity).toString());
         System.out.println("Sending reply: " + reply.getContent());
         myAgent.send(reply);
         done = true;
@@ -134,15 +129,5 @@ public class DriverBehaviour extends Behaviour {
     @Override
     public boolean done() {
         return false;
-    }
-
-    private void performMove(Point positionAfterMove, ACLMessage msg) {
-        System.out.println("Moving agent " + myAgent.getLocalName() + " from " + currentPosition + " to " + positionAfterMove);
-//        myAgent.addBehaviour(new MoveCarBehaviour(myAgent, gui, positionAfterMove));
-        ACLMessage reply = msg.createReply();
-        reply.setPerformative(ACLMessage.INFORM);
-//        reply.setContent(new CarMessage(myAgent.getLocalName(), positionAfterMove, streetNumber, velocity, velocity_y, direction).toString());
-        myAgent.send(reply);
-//        currentPosition = positionAfterMove;
     }
 }

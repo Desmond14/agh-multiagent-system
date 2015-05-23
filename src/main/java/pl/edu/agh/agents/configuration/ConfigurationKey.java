@@ -1,4 +1,4 @@
-package pl.edu.agh.agents;
+package pl.edu.agh.agents.configuration;
 
 public final class ConfigurationKey {
     public static final String AGENT_FILES = "agent.files";
