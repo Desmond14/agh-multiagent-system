@@ -57,10 +57,10 @@ public class SupervizorAgent extends Agent {
             agentToStreet.put(agentID, s1);
             agentsOnStreet.get(s1).add(name);
             int velocity1 = 0;
-//            int maxVelocity1 = 20;
-            int maxVelocity1 = 6;
-//            int acceleration = 1;
-            int acceleration = 3;
+            int maxVelocity1 = 20;
+//            int maxVelocity1 = 6;
+            int acceleration = 1;
+//            int acceleration = 3;
             Object[] args = new Object[9];
             args[0] = car.getWidth();
             args[1] = velocity1;
