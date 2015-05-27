@@ -90,8 +90,6 @@ public class SupervizorAgent extends Agent {
         }
 
         addBehaviour(new SimpleBehaviour() {
-            //TODO: refactor this should be configurable
-            public  final Double CARS_WIDTH = 40.0;
             //TODO: this method is much too complicated, should be splitted into multiple descriptive methods
             private boolean done = false;
 
@@ -161,9 +159,9 @@ public class SupervizorAgent extends Agent {
 
             private boolean collide(CarMessage message1, CarMessage message2) {
                 if (message1.getCurrentPosition() < message2.getCurrentPosition()) {
-                    return message1.getCurrentPosition() + CARS_WIDTH >= message2.getCurrentPosition();
+                    return message1.getCurrentPosition() + message1.getCarWidth() >= message2.getCurrentPosition();
                 } else {
-                    return message2.getCurrentPosition() + CARS_WIDTH >= message1.getCurrentPosition();
+                    return message2.getCurrentPosition() + message1.getCarWidth() >= message1.getCurrentPosition();
                 }
             }
 

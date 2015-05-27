@@ -1,5 +1,7 @@
 package pl.edu.agh.agents;
 
+import pl.edu.agh.agents.configuration.AgentConfiguration;
+
 public class CarMessage {
 
     private String driverName;
@@ -7,11 +9,18 @@ public class CarMessage {
     private int streetNumber;
     private int velocity;
 
-    public CarMessage(String driverName, double currentPosition, int streetNumber, int velocity) {
+    public double getCarWidth() {
+        return carWidth;
+    }
+
+    private double carWidth;
+
+    public CarMessage(String driverName, double currentPosition, int streetNumber, int velocity, double carWidth) {
         this.driverName = driverName;
         this.currentPosition = currentPosition;
         this.streetNumber = streetNumber;
         this.velocity = velocity;
+        this.carWidth = carWidth;
     }
 
     public String getDriverName() {
@@ -37,6 +46,6 @@ public class CarMessage {
     @Override
     public String toString() {
         return driverName + ";" + currentPosition + ";" +
-                streetNumber + ";" + velocity;
+                streetNumber + ";" + velocity + ";" + carWidth;
     }
 }
