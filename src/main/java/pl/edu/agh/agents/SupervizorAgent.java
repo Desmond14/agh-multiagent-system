@@ -1,8 +1,15 @@
 package pl.edu.agh.agents;
 
+import jade.content.lang.Codec;
+import jade.content.lang.sl.SLCodec;
+import jade.content.onto.Ontology;
+import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
+import jade.domain.JADEAgentManagement.JADEManagementOntology;
+import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentContainer;
 import jade.wrapper.StaleProxyException;
@@ -13,7 +20,6 @@ import pl.edu.agh.agents.configuration.AgentConfiguration;
 import pl.edu.agh.agents.configuration.ConfigurationLoader;
 import pl.edu.agh.agents.gui.Car;
 import pl.edu.agh.agents.gui.Main;
-import pl.edu.agh.agents.gui.Point;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +39,6 @@ public class SupervizorAgent extends Agent {
     private AgentContainer agentContainer;
 
     public SupervizorAgent() {
-
         drivers = new ArrayList<Driver>();
         streets = new ArrayList<Street>();
     }
@@ -77,6 +82,36 @@ public class SupervizorAgent extends Agent {
         }
 
         addBehaviour(new WorldControlBehaviour());
+        setEnabledO2ACommunication(true, 1);
+        addBehaviour(new SimpleBehaviour() {
+            private boolean done = false;
+            @Override
+            public void action() {
+                Object object = getO2AObject();
+                if (object != null){
+                    done = true;
+                    Codec codec = new SLCodec();
+                    Ontology jmo = JADEManagementOntology.getInstance();
+                    getContentManager().registerLanguage(codec);
+                    getContentManager().registerOntology(jmo);
+                    ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
+                    msg.addReceiver(getAMS());
+                    msg.setLanguage(codec.getName());
+                    msg.setOntology(jmo.getName());
+                    System.out.println("About to kill platform");
+                    try {
+                        getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
+                        send(msg);
+                    }
+                    catch (Exception e) {}
+                }
+            }
+
+            @Override
+            public boolean done(){
+                return done;
+            }
+        });
     }
 
     public void updateGui(String messageContent, AID sender) {

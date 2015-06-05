@@ -12,14 +12,21 @@ import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -36,25 +43,65 @@ public class Main extends Application {
     private Map<AID, Rectangle> carShapes = new ConcurrentHashMap<AID, Rectangle>();
     private AgentController supervisor;
     private ContainerController agentContainer;
-    private Group root;
-    private Group lanes;
+    private Group cars;
+    private Group texts;
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        root = new Group();
+        Group root = new Group();
         Scene scene = new Scene(root, STAGE_WIDTH, STAGE_HEIGHT, Color.BLACK);
         primaryStage.setScene(scene);
         //TODO: trafficLanes should be loaded from external source, e.g. xml
         trafficLanes.add(new TrafficLane(new Point(0, 275), new Point(800, 325)));
         trafficLanes.add(new TrafficLane(new Point(375, 0), new Point(425, 600)));
-        lanes = new Group();
+        Group lanes = new Group();
         drawLanes(lanes);
+        cars = new Group();
+        lanes.getChildren().add(cars);
+        texts = new Group();
 
         root.getChildren().add(lanes);
+        root.getChildren().add(texts);
+        createMenu(root);
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                Runtime rt = Runtime.instance();
+                rt.setCloseVM(true);
+                rt.shutDown();
+                System.exit(0);
+            }
+        });
         primaryStage.show();
-//        displayText("Collision detected!");
         initializeJadePlatform();
+    }
+
+    private void createMenu(Group root) {
+        MenuBar menuBar = new MenuBar();
+        Menu menu = new Menu("Menu");
+        MenuItem restartItem = new MenuItem("Restart");
+        restartItem.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                texts.getChildren().clear();
+                cars.getChildren().clear();
+                carShapes.clear();
+                try {
+                    supervisor.putO2AObject(new Object(), true);
+                    System.out.println("Restart!");
+                    Thread.currentThread().sleep(1000);
+                    initializeJadePlatform();
+                } catch (StaleProxyException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        menu.getItems().add(restartItem);
+        menuBar.getMenus().add(menu);
+        root.getChildren().add(menuBar);
     }
 
     private void initializeJadePlatform() throws StaleProxyException {
@@ -119,7 +166,7 @@ public class Main extends Application {
         carShapes.put(aid, carShape);
         Platform.runLater(new Runnable() {
             public void run() {
-                lanes.getChildren().add(carShape);
+                cars.getChildren().add(carShape);
             }
         });
     }
@@ -132,7 +179,7 @@ public class Main extends Application {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                root.getChildren().add(textShape);
+                texts.getChildren().add(textShape);
             }
         });
 
