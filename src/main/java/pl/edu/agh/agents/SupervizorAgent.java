@@ -55,6 +55,8 @@ public class SupervizorAgent extends Agent {
             throw new IllegalArgumentException();
         }
         gui = (Main) arguments[0];
+        gui.assignStreetsToTrafficLanes(streets);
+        gui.calculateCrossroads();
         ConfigurationLoader configLoader = new ConfigurationLoader();
         try {
             configLoader.load();
@@ -138,9 +140,18 @@ public class SupervizorAgent extends Agent {
             agentsOnStreet.get(streets.get(1)).add(config.getName());
             Car car = new Car(positionTranslator.translatePosition(agentID, config.getInitialPosition()),
                     config.getCarLength(), config.getCarWidth(), Color.GREEN);
-            Object[] args = new Object[] {config};
+            Object[] args = new Object[] {config, gui, streets.get(0)};
             drivers.add(new Driver(agentID, agentContainer.createNewAgent(config.getName(),
                     DRIVER_AGENT_CLASS, args), car));
         }
+    }
+
+    public Street getStreetByNumber(int streetNumber) {
+        for(Street street : streets) {
+            if(street.getStreetNumber() == streetNumber) {
+                return street;
+            }
+        }
+        return null;
     }
 }

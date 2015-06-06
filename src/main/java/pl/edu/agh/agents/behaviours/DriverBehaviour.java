@@ -3,11 +3,8 @@ package pl.edu.agh.agents.behaviours;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
-import pl.edu.agh.agents.CarMessage;
-import pl.edu.agh.agents.DriverAgent;
-import pl.edu.agh.agents.MessageParser;
-import pl.edu.agh.agents.configuration.AgentConfiguration;
-import pl.edu.agh.agents.gui.Point;
+import pl.edu.agh.agents.*;
+
 import java.lang.Math;
 
 import java.util.ArrayList;
@@ -36,6 +33,7 @@ public class DriverBehaviour extends Behaviour {
             if (!msg.getContent().startsWith("Welcome")) {
                 List<CarMessage> driversInfo = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
                 List<CarMessage> driversAhead = getDriversAhead(driversInfo);
+                checkForCrossroadsNearby();
                 if (driversAhead.isEmpty()){
                     simplyMove();
                 } else {
@@ -126,6 +124,51 @@ public class DriverBehaviour extends Behaviour {
         myAgent.send(reply);
         done = true;
         block();
+    }
+
+    private String checkForCrossroadsNearby() {
+        int streetNumber = agent.getConfiguration().getStreetNumber();
+        List<Crossroad> crossroadsNearby = agent.getGui().getCrossRoadsForGivenStreetNumber(streetNumber);
+        Double position = currentPosition;
+        Street street = agent.getStreet();
+        double positionAhead = position;
+        boolean crossroadFound = false;
+        StringBuilder builder = new StringBuilder("");
+        //maksymalnie bêdziemy wyszukiwaæ skrzy¿owania 100 metrów od bie¿¹cego po³o¿enia
+        while(positionAhead <= 100 && !crossroadFound) {
+            for(Crossroad crossroad : crossroadsNearby) {
+                if(street.getDirection().equals(Direction.HORIZONTAL)) {
+                    if(positionAhead >= crossroad.getUpperLeft().getX() && positionAhead <= crossroad.getBottomRight().getX()) {
+                        crossroadFound = true;
+
+                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
+                        if(positionAhead == position) {
+                            crossroad.setIsCarOnCrossroad(true);
+                        }
+                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
+                        builder.append(positionAhead - position);
+                        builder.append("-");
+                        builder.append(crossroad.isCarOnCrossroad());
+                    }
+                }
+                else {
+                    if(positionAhead >= crossroad.getUpperLeft().getY() && positionAhead <= crossroad.getBottomRight().getY()) {
+                        crossroadFound = true;
+
+                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
+                        if(positionAhead == position) {
+                            crossroad.setIsCarOnCrossroad(true);
+                        }
+                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
+                        builder.append(positionAhead - position);
+                        builder.append("-");
+                        builder.append(crossroad.isCarOnCrossroad());
+                    }
+                }
+            }
+            positionAhead += 10; // szukamy skrzy¿owania 10 metrów dalej
+        }
+        return builder.toString();
     }
 
     @Override

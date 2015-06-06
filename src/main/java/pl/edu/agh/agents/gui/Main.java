@@ -28,6 +28,9 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
+import pl.edu.agh.agents.Crossroad;
+import pl.edu.agh.agents.Direction;
+import pl.edu.agh.agents.Street;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +44,7 @@ public class Main extends Application {
     public static final int STAGE_HEIGHT = 600;
     private List<TrafficLane> trafficLanes = new ArrayList<TrafficLane>();
     private Map<AID, Rectangle> carShapes = new ConcurrentHashMap<AID, Rectangle>();
+    private List<Crossroad> crossroads = new ArrayList<Crossroad>();
     private AgentController supervisor;
     private ContainerController agentContainer;
     private Group cars;
@@ -183,6 +187,47 @@ public class Main extends Application {
             }
         });
 
+    }
+
+    public void assignStreetsToTrafficLanes(List<Street> streets) {
+        int i = 0;
+        for(TrafficLane trafficLane : trafficLanes) {
+            trafficLane.setStreet(streets.get(i++));
+        }
+    }
+
+    public List<Crossroad> calculateCrossroads() {
+        List<Crossroad> crossroads = new ArrayList<>();
+        for(TrafficLane trafficLane : trafficLanes) {
+            for(TrafficLane otherTrafficLane : trafficLanes) {
+                if(trafficLane != otherTrafficLane && trafficLane.getStreet().getNeighboorStreets().contains(otherTrafficLane.getStreet())) { //jezeli sa sasiednimi ulicami
+                    Point crossroadUpperLeft;
+                    Point crossroadBottomRight;
+                    if(trafficLane.getStreet().getDirection() == Direction.VERTICAL) {
+                        crossroadUpperLeft = new Point(trafficLane.getUpperLeft().getX(), otherTrafficLane.getUpperLeft().getY());
+                        crossroadBottomRight = new Point(trafficLane.getBottomRight().getX(), otherTrafficLane.getBottomRight().getY());
+                    }
+                    else {
+                        crossroadUpperLeft = new Point(otherTrafficLane.getUpperLeft().getX(), trafficLane.getUpperLeft().getY());
+                        crossroadBottomRight = new Point(otherTrafficLane.getBottomRight().getX(), trafficLane.getBottomRight().getY());
+                    }
+                    Crossroad crossroad = new Crossroad(crossroadUpperLeft, crossroadBottomRight, trafficLane.getStreet(), otherTrafficLane.getStreet());
+                    crossroads.add(crossroad);
+                }
+            }
+        }
+        this.crossroads = crossroads;
+        return crossroads;
+    }
+
+    public List<Crossroad> getCrossRoadsForGivenStreetNumber(int streetNumber) {
+        List<Crossroad> crossroadsWithGivenStreet = new ArrayList<Crossroad>();
+        for (Crossroad crossroad : crossroads) {
+            if(crossroad.getStreetOne().getStreetNumber() == streetNumber) {
+                crossroadsWithGivenStreet.add(crossroad);
+            }
+        }
+        return crossroadsWithGivenStreet;
     }
 
     public static void main(String[] args) {

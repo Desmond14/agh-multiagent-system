@@ -34,8 +34,9 @@ public class WorldControlBehaviour extends Behaviour {
                     done = true;
                     return;
                 }
+                checkForCollisions();
 
-                sendDriverMessage(driversInfoMsg);
+                sendDriverMessage(driversInfoMsg, msg);
 
                 try {
                     Thread.sleep(200);
@@ -90,13 +91,59 @@ public class WorldControlBehaviour extends Behaviour {
         return stringBuilder.toString().substring(0, stringBuilder.toString().length() - 1);
     }
 
-    private void sendDriverMessage(String driversInfoMsg) {
+    private void sendDriverMessage(String driversInfoMsg, ACLMessage msg) {
         for (Driver driver : supervizorAgent.drivers) {
             ACLMessage broadcastMsg = new ACLMessage(ACLMessage.INFORM);
             broadcastMsg.setContent(driversInfoMsg);
             broadcastMsg.addReceiver(driver.getDriverAgentID());
             myAgent.send(broadcastMsg);
         }
+    }
+
+    private String checkForCrossroadsNerby(ACLMessage msg) {
+        List<CarMessage> carMessageList = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
+        int streetNumber = carMessageList.get(0).getStreetNumber();
+        List<Crossroad> crossroadsNearby = supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(streetNumber);
+        Double position = carMessageList.get(0).getCurrentPosition();
+        Street street = supervizorAgent.getStreetByNumber(streetNumber);
+        double positionAhead = position;
+        boolean crossroadFound = false;
+        StringBuilder builder = new StringBuilder("");
+        //maksymalnie bêdziemy wyszukiwaæ skrzy¿owania 100 metrów od bie¿¹cego po³o¿enia
+        while(positionAhead <= 100 && !crossroadFound) {
+            for(Crossroad crossroad : crossroadsNearby) {
+                if(street.getDirection().equals(Direction.HORIZONTAL)) {
+                    if(positionAhead >= crossroad.getUpperLeft().getX() && positionAhead <= crossroad.getBottomRight().getX()) {
+                        crossroadFound = true;
+
+                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
+                        if(positionAhead == position) {
+                            crossroad.setIsCarOnCrossroad(true);
+                        }
+                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
+                        builder.append(positionAhead - position);
+                        builder.append("-");
+                        builder.append(crossroad.isCarOnCrossroad());
+                    }
+                }
+                else {
+                    if(positionAhead >= crossroad.getUpperLeft().getY() && positionAhead <= crossroad.getBottomRight().getY()) {
+                        crossroadFound = true;
+
+                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
+                        if(positionAhead == position) {
+                            crossroad.setIsCarOnCrossroad(true);
+                        }
+                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
+                        builder.append(positionAhead - position);
+                        builder.append("-");
+                        builder.append(crossroad.isCarOnCrossroad());
+                    }
+                }
+            }
+            positionAhead += 10; // szukamy skrzy¿owania 10 metrów dalej
+        }
+        return builder.toString();
     }
 
     @Override
