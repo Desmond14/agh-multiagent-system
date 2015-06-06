@@ -147,7 +147,7 @@ public class DriverBehaviour extends Behaviour {
                         }
                         //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
                         builder.append(positionAhead - position);
-                        builder.append("-");
+                        builder.append(";");
                         builder.append(crossroad.isCarOnCrossroad());
                     }
                 }
@@ -161,7 +161,7 @@ public class DriverBehaviour extends Behaviour {
                         }
                         //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
                         builder.append(positionAhead - position);
-                        builder.append("-");
+                        builder.append(";");
                         builder.append(crossroad.isCarOnCrossroad());
                     }
                 }
