@@ -135,7 +135,7 @@ public class DriverBehaviour extends Behaviour {
         boolean crossroadFound = false;
         StringBuilder builder = new StringBuilder("");
         //maksymalnie bêdziemy wyszukiwaæ skrzy¿owania 100 metrów od bie¿¹cego po³o¿enia
-        while(positionAhead <= 100 && !crossroadFound) {
+        while(positionAhead <= position + 100 && !crossroadFound) {
             for(Crossroad crossroad : crossroadsNearby) {
                 if(street.getDirection().equals(Direction.HORIZONTAL)) {
                     if(positionAhead >= crossroad.getUpperLeft().getX() && positionAhead <= crossroad.getBottomRight().getX()) {
