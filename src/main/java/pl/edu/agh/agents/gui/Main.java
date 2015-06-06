@@ -200,7 +200,8 @@ public class Main extends Application {
         List<Crossroad> crossroads = new ArrayList<>();
         for(TrafficLane trafficLane : trafficLanes) {
             for(TrafficLane otherTrafficLane : trafficLanes) {
-                if(trafficLane != otherTrafficLane && trafficLane.getStreet().getNeighboorStreets().contains(otherTrafficLane.getStreet())) { //jezeli sa sasiednimi ulicami
+                if(trafficLane != otherTrafficLane && trafficLane.getStreet().getNeighboorStreets().contains(otherTrafficLane.getStreet())
+                        && !crossroadAlreadyExist(trafficLane.getStreet(), otherTrafficLane.getStreet(), crossroads)) { //jezeli sa sasiednimi ulicami i skrzyzowanie tych ulic nie zostalo znalezione wczesniej
                     Point crossroadUpperLeft;
                     Point crossroadBottomRight;
                     if(trafficLane.getStreet().getDirection() == Direction.VERTICAL) {
@@ -223,11 +224,21 @@ public class Main extends Application {
     public List<Crossroad> getCrossRoadsForGivenStreetNumber(int streetNumber) {
         List<Crossroad> crossroadsWithGivenStreet = new ArrayList<Crossroad>();
         for (Crossroad crossroad : crossroads) {
-            if(crossroad.getStreetOne().getStreetNumber() == streetNumber) {
+            if(crossroad.getStreetOne().getStreetNumber() == streetNumber || crossroad.getStreetTwo().getStreetNumber() == streetNumber) {
                 crossroadsWithGivenStreet.add(crossroad);
             }
         }
         return crossroadsWithGivenStreet;
+    }
+
+    private boolean crossroadAlreadyExist(Street streetOne, Street streetTwo, List<Crossroad> crossroads) {
+        for (Crossroad crossroad : crossroads) {
+            if((crossroad.getStreetOne() == streetOne && crossroad.getStreetTwo() == streetTwo)
+                    || (crossroad.getStreetOne() == streetTwo && crossroad.getStreetTwo() == streetOne)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void main(String[] args) {
