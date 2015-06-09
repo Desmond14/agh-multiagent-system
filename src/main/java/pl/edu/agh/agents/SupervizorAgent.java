@@ -136,11 +136,11 @@ public class SupervizorAgent extends Agent {
         List<AgentConfiguration> agentConfigurations = configLoader.getAgentConfigurations();
         for (AgentConfiguration config : agentConfigurations){
             AID agentID = new AID(config.getName(), AID.ISLOCALNAME);
-            agentToStreet.put(agentID, streets.get(0));
+            agentToStreet.put(agentID, getStreetByNumber(config.getStreetNumber()));
             agentsOnStreet.get(streets.get(1)).add(config.getName());
             Car car = new Car(positionTranslator.translatePosition(agentID, config.getInitialPosition()),
                     config.getCarLength(), config.getCarWidth(), Color.GREEN);
-            Object[] args = new Object[] {config, gui, streets.get(0)};
+            Object[] args = new Object[] {config, gui, getStreetByNumber(config.getStreetNumber())};
             drivers.add(new Driver(agentID, agentContainer.createNewAgent(config.getName(),
                     DRIVER_AGENT_CLASS, args), car));
         }
