@@ -9,6 +9,7 @@ public class AgentConfiguration {
     private Integer maxVelocity;
     private Integer acceleration;
     private Integer streetNumber;
+    private Double timeToStopThreshold;
 
     public String getName() {
         return name;
@@ -72,6 +73,14 @@ public class AgentConfiguration {
 
     public void setStreetNumber(Integer streetNumber) {
         this.streetNumber = streetNumber;
+    }
+
+    public Double getTimeToStopThreshold() {
+        return timeToStopThreshold;
+    }
+
+    public void setTimeToStopThreshold(Double timeToStopThreshold) {
+        this.timeToStopThreshold = timeToStopThreshold;
     }
 }
 

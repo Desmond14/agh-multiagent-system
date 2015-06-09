@@ -24,7 +24,8 @@ public class MessageParser {
                 Double.parseDouble(messageChunks[1]),
                 Integer.parseInt(messageChunks[2]),
                 Integer.parseInt(messageChunks[3]),
-                Double.parseDouble(messageChunks[4])
+                Double.parseDouble(messageChunks[4]),
+                Double.parseDouble(messageChunks[5])
         );
     }
 }

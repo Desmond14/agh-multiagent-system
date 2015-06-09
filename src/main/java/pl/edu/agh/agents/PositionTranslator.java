@@ -23,4 +23,13 @@ public class PositionTranslator {
         }
         return guiPosition;
     }
+
+    public Double translatePosition(AID aid, Point point){
+        Street agentStreet = agentToStreet.get(aid);
+        if (Direction.HORIZONTAL.equals(agentStreet.getDirection())){
+            return point.getX();
+        } else {
+            return point.getY();
+        }
+    }
 }

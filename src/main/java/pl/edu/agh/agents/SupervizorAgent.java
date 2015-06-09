@@ -36,6 +36,7 @@ public class SupervizorAgent extends Agent {
     public Main gui;
     public Map<String, String> driversInfoMap = new HashMap<String, String>();
     private List<Street> streets;
+    private List<Crossroad> crossroads;
     private AgentContainer agentContainer;
 
     public SupervizorAgent() {
@@ -56,7 +57,7 @@ public class SupervizorAgent extends Agent {
         }
         gui = (Main) arguments[0];
         gui.assignStreetsToTrafficLanes(streets);
-        gui.calculateCrossroads();
+        crossroads = gui.calculateCrossroads();
         ConfigurationLoader configLoader = new ConfigurationLoader();
         try {
             configLoader.load();
@@ -137,10 +138,12 @@ public class SupervizorAgent extends Agent {
         for (AgentConfiguration config : agentConfigurations){
             AID agentID = new AID(config.getName(), AID.ISLOCALNAME);
             agentToStreet.put(agentID, getStreetByNumber(config.getStreetNumber()));
-            agentsOnStreet.get(streets.get(1)).add(config.getName());
+            agentsOnStreet.get(getStreetByNumber(config.getStreetNumber())).add(config.getName());
             Car car = new Car(positionTranslator.translatePosition(agentID, config.getInitialPosition()),
                     config.getCarLength(), config.getCarWidth(), Color.GREEN);
-            Object[] args = new Object[] {config, gui, getStreetByNumber(config.getStreetNumber())};
+            //TODO: for now simple assumption that exactly one crossroad exists
+            Double distanceToCrossroad = positionTranslator.translatePosition(agentID, crossroads.get(0).getUpperLeft());
+            Object[] args = new Object[] {config, gui, getStreetByNumber(config.getStreetNumber()), distanceToCrossroad};
             drivers.add(new Driver(agentID, agentContainer.createNewAgent(config.getName(),
                     DRIVER_AGENT_CLASS, args), car));
         }

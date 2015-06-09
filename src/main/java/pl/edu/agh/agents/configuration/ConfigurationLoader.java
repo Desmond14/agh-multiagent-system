@@ -38,6 +38,7 @@ public class ConfigurationLoader {
         agentConfiguration.setInitialVelocity(loadInteger(properties, ConfigurationKey.INITIAL_VELOCITY));
         agentConfiguration.setMaxVelocity(loadInteger(properties, ConfigurationKey.MAX_VELOCITY));
         agentConfiguration.setStreetNumber(loadInteger(properties, ConfigurationKey.STREET_NUMBER));
+        agentConfiguration.setTimeToStopThreshold(loadDouble(properties, ConfigurationKey.TIME_TO_STOP_THRESHOLD));
         return agentConfiguration;
     }
 

@@ -24,6 +24,6 @@ public class DriverAgent extends Agent {
         configuration = (AgentConfiguration) args[0];
         gui = (Main) args[1];
         street = (Street) args[2];
-        addBehaviour(new DriverBehaviour(this));
+        addBehaviour(new DriverBehaviour(this, (Double)args[3]));
     }
 }

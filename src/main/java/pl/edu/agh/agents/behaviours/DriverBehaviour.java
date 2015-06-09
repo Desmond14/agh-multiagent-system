@@ -8,21 +8,24 @@ import pl.edu.agh.agents.*;
 import java.lang.Math;
 
 import java.util.ArrayList;
+import java.util.DuplicateFormatFlagsException;
 import java.util.List;
 
 public class DriverBehaviour extends Behaviour {
     public static int TIME_TO_COLLISION_THRESHOLD = 2;
-    //private AgentConfiguration configuration;
+    public static Double CROSSROAD_LENGTH = 50.0;
     private Double currentPosition;
+    private Double distanceToCrossroad;
     private Integer velocity;
     private boolean done;
     private DriverAgent agent;
 
-    public DriverBehaviour(Agent agent) {
+    public DriverBehaviour(Agent agent, Double distanceToCrossroad) {
         super(agent);
         this.agent = (DriverAgent)agent;
         currentPosition = this.agent.getConfiguration().getInitialPosition();
         velocity = this.agent.getConfiguration().getInitialVelocity();
+        this.distanceToCrossroad = distanceToCrossroad;
     }
 
     @Override
@@ -34,9 +37,16 @@ public class DriverBehaviour extends Behaviour {
                 List<CarMessage> driversInfo = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
                 List<CarMessage> driversAhead = getDriversAhead(driversInfo);
                 checkForCrossroadsNearby();
-                if (driversAhead.isEmpty()){
-                    simplyMove();
-                } else {
+                if (driversAhead.isEmpty()) {
+                    if (distanceToCrossroad >= 0) {
+                        avoidCollisionOnCrossroad(driversInfo);
+                    } else{
+                        simplyMove();
+                    }
+                } else if ((distanceToCrossroad >= 0 && distanceToCrossroad < calculateDistance(getClosest(driversAhead)))){
+                    avoidCollisionOnCrossroad(driversInfo);
+                }
+                else {
                     avoidCollisionWith(getClosest(driversAhead));
                 }
             } else {
@@ -44,6 +54,38 @@ public class DriverBehaviour extends Behaviour {
             }
             replyWithNewPosition(msg);
         }
+    }
+
+    private void avoidCollisionOnCrossroad(List<CarMessage> driversInfo) {
+        System.out.println("Avoiding collision on crossroad");
+        if (calculateTimeToStop() > agent.getConfiguration().getTimeToStopThreshold()){
+            simplyMove();
+        } else {
+            CarMessage closest = getClosestOnDifferentStreet(driversInfo);
+            if (closest == null || iWillBeFirst(closest)) {
+                simplyMove();
+            } else {
+                slowDown();
+            }
+        }
+    }
+
+    private boolean iWillBeFirst(CarMessage closest) {
+        return (distanceToCrossroad / velocity) < (closest.getDistanceToCrossroad() / closest.getVelocity());
+    }
+
+    private CarMessage getClosestOnDifferentStreet(List<CarMessage> driversInfo) {
+        CarMessage closest = null;
+        double closestDistanceToCrossroad = Double.MAX_VALUE;
+        for (CarMessage driver : driversInfo){
+            if (driver.getStreetNumber() != agent.getConfiguration().getStreetNumber()) {
+                double distanceToCrossroad = driver.getDistanceToCrossroad();
+                if (distanceToCrossroad > 0 && distanceToCrossroad < closestDistanceToCrossroad) {
+                    closest = driver;
+                }
+            }
+        }
+        return closest;
     }
 
     private List<CarMessage> getDriversAhead(List<CarMessage> driversInfo) {
@@ -69,6 +111,7 @@ public class DriverBehaviour extends Behaviour {
         int newVelocity = Math.min(velocity + agent.getConfiguration().getAcceleration(), agent.getConfiguration().getMaxVelocity());
         distance = (velocity + newVelocity) / 2;    // simple approximation of accelarated move
         currentPosition += distance;
+        distanceToCrossroad -= distance;
         velocity = newVelocity;
     }
 
@@ -89,7 +132,12 @@ public class DriverBehaviour extends Behaviour {
         return message.getCurrentPosition() - (this.currentPosition + agent.getConfiguration().getCarWidth());
     }
 
+    private Double calculateTimeToStop(){
+        return distanceToCrossroad / velocity;
+    }
+
     private void avoidCollisionWith(CarMessage closestCar) {
+        System.out.println("Avoiding collision with driver ahead");
         int timeToCollision = calculateTimeToCollision(closestCar);
         if (timeToCollision < TIME_TO_COLLISION_THRESHOLD){
             slowDown();
@@ -113,13 +161,19 @@ public class DriverBehaviour extends Behaviour {
         int newVelocity = Math.max(velocity - agent.getConfiguration().getAcceleration(), 0);
         distance = (velocity + newVelocity) / 2;    // simple approximation of accelarated move
         currentPosition += distance;
+        distanceToCrossroad -= distance;
         velocity = newVelocity;
     }
 
     private void replyWithNewPosition(ACLMessage msg) {
         ACLMessage reply = msg.createReply();
         reply.setPerformative(ACLMessage.INFORM);
-        reply.setContent(new CarMessage(myAgent.getLocalName(), currentPosition, agent.getConfiguration().getStreetNumber(), velocity, agent.getConfiguration().getCarWidth()).toString());
+        reply.setContent(new CarMessage(myAgent.getLocalName(),
+                currentPosition,
+                agent.getConfiguration().getStreetNumber(),
+                velocity,
+                agent.getConfiguration().getCarWidth(),
+                distanceToCrossroad).toString());
         System.out.println("Sending reply: " + reply.getContent());
         myAgent.send(reply);
         done = true;
