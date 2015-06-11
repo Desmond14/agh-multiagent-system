@@ -4,6 +4,7 @@ import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import pl.edu.agh.agents.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,12 +30,13 @@ public class WorldControlBehaviour extends Behaviour {
                 messageCount = 0;
 
                 String driversInfoMsg = createDriverMessage();
-                if (checkForCollisions()){
+                if (checkForCollisionsOnStreet() || checkForCollisionsOnCrossroads()){
                     supervizorAgent.gui.displayText("Collision detected!");
                     done = true;
                     return;
                 }
-                checkForCollisions();
+                checkForCollisionsOnStreet();
+                checkForCollisionsOnCrossroads();
 
                 sendDriverMessage(driversInfoMsg, msg);
 
@@ -50,7 +52,7 @@ public class WorldControlBehaviour extends Behaviour {
     }
 
     //TODO: refactor ASAP as well as whole class SupervizorAgent!
-    private boolean checkForCollisions() {
+    private boolean checkForCollisionsOnStreet() {
         for (Street street : supervizorAgent.agentsOnStreet.keySet()){
             List<String> agents = supervizorAgent.agentsOnStreet.get(street);
             for (String agent : agents) {
@@ -60,6 +62,39 @@ public class WorldControlBehaviour extends Behaviour {
                         CarMessage message2 = MessageParser.parseCarMessage(supervizorAgent.driversInfoMap.get(otherAgent));
                         if (collide(message1, message2)){
                             return true;
+                        }
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean checkForCollisionsOnCrossroads() {
+        List<String> agents = new ArrayList<>();
+        for (Street street : supervizorAgent.agentsOnStreet.keySet()){
+            agents.addAll(supervizorAgent.agentsOnStreet.get(street));
+        }
+        for (String agent : agents) {
+            for (String otherAgent : agents) {
+                if (!agent.equals(otherAgent)) {
+                    CarMessage message1 = MessageParser.parseCarMessage(supervizorAgent.driversInfoMap.get(agent));
+                    CarMessage message2 = MessageParser.parseCarMessage(supervizorAgent.driversInfoMap.get(otherAgent));
+                    Direction dir1 = supervizorAgent.getStreetByNumber(message1.getStreetNumber()).getDirection();
+                    if(dir1 == Direction.HORIZONTAL) {
+                        for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
+                            if(message1.getCurrentPosition() + message1.getCarWidth() >= crossroad.getUpperLeft().getX() && message1.getCurrentPosition() <= crossroad.getBottomRight().getX()
+                                    && message2.getCurrentPosition() + message2.getCarWidth() >= crossroad.getUpperLeft().getY() && message2.getCurrentPosition() <= crossroad.getBottomRight().getY()) {
+                                return true;
+                            }
+                        }
+                    }
+                    else {
+                        for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
+                            if(message1.getCurrentPosition() >= crossroad.getUpperLeft().getY() && message1.getCurrentPosition() <= crossroad.getBottomRight().getY()
+                                    && message2.getCurrentPosition() >= crossroad.getUpperLeft().getX() && message2.getCurrentPosition() <= crossroad.getBottomRight().getX()) {
+                                return true;
+                            }
                         }
                     }
                 }
