@@ -143,6 +143,7 @@ public class SupervizorAgent extends Agent {
                     config.getCarLength(), config.getCarWidth(), Color.GREEN);
             //TODO: for now simple assumption that exactly one crossroad exists
             Double distanceToCrossroad = positionTranslator.translatePosition(agentID, crossroads.get(0).getUpperLeft());
+            distanceToCrossroad -= config.getInitialPosition();
             Object[] args = new Object[] {config, gui, getStreetByNumber(config.getStreetNumber()), distanceToCrossroad};
             drivers.add(new Driver(agentID, agentContainer.createNewAgent(config.getName(),
                     DRIVER_AGENT_CLASS, args), car));

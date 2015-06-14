@@ -10,6 +10,7 @@ public class AgentConfiguration {
     private Integer acceleration;
     private Integer streetNumber;
     private Double timeToStopThreshold;
+    private Double safetyDistance;
 
     public String getName() {
         return name;
@@ -81,6 +82,14 @@ public class AgentConfiguration {
 
     public void setTimeToStopThreshold(Double timeToStopThreshold) {
         this.timeToStopThreshold = timeToStopThreshold;
+    }
+
+    public Double getSafetyDistance() {
+        return safetyDistance;
+    }
+
+    public void setSafetyDistance(Double safetyDistance) {
+        this.safetyDistance = safetyDistance;
     }
 }
 

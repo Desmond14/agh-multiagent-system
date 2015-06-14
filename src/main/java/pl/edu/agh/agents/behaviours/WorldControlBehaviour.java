@@ -3,6 +3,7 @@ package pl.edu.agh.agents.behaviours;
 import jade.core.behaviours.Behaviour;
 import jade.lang.acl.ACLMessage;
 import pl.edu.agh.agents.*;
+import pl.edu.agh.agents.gui.Main;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,20 +81,26 @@ public class WorldControlBehaviour extends Behaviour {
                 if (!agent.equals(otherAgent)) {
                     CarMessage message1 = MessageParser.parseCarMessage(supervizorAgent.driversInfoMap.get(agent));
                     CarMessage message2 = MessageParser.parseCarMessage(supervizorAgent.driversInfoMap.get(otherAgent));
-                    Direction dir1 = supervizorAgent.getStreetByNumber(message1.getStreetNumber()).getDirection();
-                    if(dir1 == Direction.HORIZONTAL) {
-                        for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
-                            if(message1.getCurrentPosition() + message1.getCarWidth() >= crossroad.getUpperLeft().getX() && message1.getCurrentPosition() <= crossroad.getBottomRight().getX()
-                                    && message2.getCurrentPosition() + message2.getCarWidth() >= crossroad.getUpperLeft().getY() && message2.getCurrentPosition() <= crossroad.getBottomRight().getY()) {
-                                return true;
+                    if (message1.getStreetNumber() != message2.getStreetNumber()) {
+                        Direction dir1 = supervizorAgent.getStreetByNumber(message1.getStreetNumber()).getDirection();
+                        if (dir1 == Direction.HORIZONTAL) {
+                            for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
+                                if (message1.getCurrentPosition() + message1.getCarWidth() >= crossroad.getUpperLeft().getX() && message1.getCurrentPosition() <= crossroad.getBottomRight().getX()
+                                        && message2.getCurrentPosition() + message2.getCarWidth() >= crossroad.getUpperLeft().getY() && message2.getCurrentPosition() <= crossroad.getBottomRight().getY()) {
+                                    //they're both on the crossroad but do they collide?
+                                    if (message1.getCurrentPosition() + message1.getCarWidth() > (Main.STAGE_WIDTH - message2.getCarWidth()) /2) {
+                                        System.out.println("Collision between " + message1.getDriverName() + " and " + message2.getDriverName());
+                                        return true;
+                                    }
+                                }
                             }
-                        }
-                    }
-                    else {
-                        for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
-                            if(message1.getCurrentPosition() >= crossroad.getUpperLeft().getY() && message1.getCurrentPosition() <= crossroad.getBottomRight().getY()
-                                    && message2.getCurrentPosition() >= crossroad.getUpperLeft().getX() && message2.getCurrentPosition() <= crossroad.getBottomRight().getX()) {
-                                return true;
+                        } else {
+                            for (Crossroad crossroad : supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(message1.getStreetNumber())) {
+                                if (message1.getCurrentPosition() >= crossroad.getUpperLeft().getY() && message1.getCurrentPosition() <= crossroad.getBottomRight().getY()
+                                        && message2.getCurrentPosition() >= crossroad.getUpperLeft().getX() && message2.getCurrentPosition() <= crossroad.getBottomRight().getX()) {
+                                    System.out.println("Collision between " + message1.getDriverName() + " and " + message2.getDriverName());
+                                    return true;
+                                }
                             }
                         }
                     }
@@ -133,52 +140,6 @@ public class WorldControlBehaviour extends Behaviour {
             broadcastMsg.addReceiver(driver.getDriverAgentID());
             myAgent.send(broadcastMsg);
         }
-    }
-
-    private String checkForCrossroadsNerby(ACLMessage msg) {
-        List<CarMessage> carMessageList = MessageParser.getCarMessages(msg.getContent(), myAgent.getName());
-        int streetNumber = carMessageList.get(0).getStreetNumber();
-        List<Crossroad> crossroadsNearby = supervizorAgent.gui.getCrossRoadsForGivenStreetNumber(streetNumber);
-        Double position = carMessageList.get(0).getCurrentPosition();
-        Street street = supervizorAgent.getStreetByNumber(streetNumber);
-        double positionAhead = position;
-        boolean crossroadFound = false;
-        StringBuilder builder = new StringBuilder("");
-        //maksymalnie bêdziemy wyszukiwaæ skrzy¿owania 100 metrów od bie¿¹cego po³o¿enia
-        while(positionAhead <= 100 && !crossroadFound) {
-            for(Crossroad crossroad : crossroadsNearby) {
-                if(street.getDirection().equals(Direction.HORIZONTAL)) {
-                    if(positionAhead >= crossroad.getUpperLeft().getX() && positionAhead <= crossroad.getBottomRight().getX()) {
-                        crossroadFound = true;
-
-                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
-                        if(positionAhead == position) {
-                            crossroad.setIsCarOnCrossroad(true);
-                        }
-                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
-                        builder.append(positionAhead - position);
-                        builder.append("-");
-                        builder.append(crossroad.isCarOnCrossroad());
-                    }
-                }
-                else {
-                    if(positionAhead >= crossroad.getUpperLeft().getY() && positionAhead <= crossroad.getBottomRight().getY()) {
-                        crossroadFound = true;
-
-                        //jeœli aktualnie rozwa¿ane auto jest na skrzy¿owaniu
-                        if(positionAhead == position) {
-                            crossroad.setIsCarOnCrossroad(true);
-                        }
-                        //w wiadomosci do konkretnego drivera bedziemy przesylac informacje o tym, jak daleko jest od najblizszego skrzyzowania i czy ktos aktualnie sie na nim znajduje
-                        builder.append(positionAhead - position);
-                        builder.append("-");
-                        builder.append(crossroad.isCarOnCrossroad());
-                    }
-                }
-            }
-            positionAhead += 10; // szukamy skrzy¿owania 10 metrów dalej
-        }
-        return builder.toString();
     }
 
     @Override

@@ -11,4 +11,5 @@ public final class ConfigurationKey {
     public static final String ACCELERATION = "acceleration";
     public static final String STREET_NUMBER = "street.number";
     public static final String TIME_TO_STOP_THRESHOLD = "time.to.stop.threshold";
+    public static final String SAFETY_DISTANCE = "safety.distance";
 }
